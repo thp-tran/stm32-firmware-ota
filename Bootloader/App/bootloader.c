@@ -8,7 +8,7 @@
 /* ===== CONFIG ===== */
 #define OTA_TIMEOUT_MS 5000
 #define OTA_MAX_SIZE (64 * 1024)
-
+#define FIRST_LINE_LENGTH 2 // Do not write 1st line of hex file
 /* ===== Static variables ===== */
 static bl_state_t bl_state = BL_IDLE;
 static uint32_t last_activity_ms = 0;
@@ -16,7 +16,7 @@ static uint32_t write_addr = ADDR_APP;
 static uint32_t received_size = 0;
 static bool ota_done_flag = false;
 
-static struct min_context min_ctx;
+struct min_context min_ctx;
 
 /* ===== Internal helpers ===== */
 static void bl_reset_ota(void)
@@ -29,7 +29,7 @@ static void bl_reset_ota(void)
 /* ===== Public functions ===== */
 void bootloader_init(void)
 {
-    min_init_context(&min_ctx, 0);
+	  min_init_context(&min_ctx, 0);
     bl_state = BL_IDLE;
     ota_done_flag = false;
 }
@@ -101,7 +101,9 @@ void min_application_handler(uint8_t min_id,
     switch (min_id)
     {
     case OTA_CMD_START:
-        //flash_erase_app();
+				unlock_flash();
+				erase_app();
+				lock_flash();
         bl_reset_ota();
         bl_state = BL_RECEIVING;
         ota_send_ack(&min_ctx);
@@ -116,11 +118,14 @@ void min_application_handler(uint8_t min_id,
             bl_state = BL_ROLLBACK;
             break;
         }
-
-        write_flash(write_addr, (uint8_t *)payload, len);
-        write_addr += len;
-        received_size += len;
-
+				if(len != FIRST_LINE_LENGTH){
+					unlock_flash();
+					write_flash(write_addr, (uint8_t *)payload, len);
+					lock_flash();
+					write_addr += len;
+					received_size += len;
+				}
+				HAL_GPIO_WritePin(GPIOA, GPIO_PIN_0, 0);
         ota_send_ack(&min_ctx);
         break;
 

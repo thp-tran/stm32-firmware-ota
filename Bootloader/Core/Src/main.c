@@ -47,7 +47,7 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-struct min_context min_ctx;
+extern struct min_context min_ctx;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -91,10 +91,11 @@ int main(void)
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   MX_USART1_UART_Init();
+  MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
+	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_0, 1);
 	uart_port_init();
   /* Init bootloader + MIN */
-  min_init_context(&min_ctx, 0);
   bootloader_init();
   /* USER CODE END 2 */
 
@@ -111,7 +112,7 @@ int main(void)
 				min_poll(&min_ctx, &byte, 1);
     }
 
-        /* Run OTA state machine */
+    /* Run OTA state machine */
     bootloader_process();
   }
   /* USER CODE END 3 */
@@ -134,7 +135,7 @@ void SystemClock_Config(void)
   RCC_OscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_DEFAULT;
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
   RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSI_DIV2;
-  RCC_OscInitStruct.PLL.PLLMUL = RCC_PLL_MUL6;
+  RCC_OscInitStruct.PLL.PLLMUL = RCC_PLL_MUL2;
   if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
   {
     Error_Handler();

@@ -1,5 +1,5 @@
 #include "Flash.h"
-
+#include "board.h"
 void erase_flash(uint32_t addr){
 	FLASH_EraseInitTypeDef pEraseInit;
 	pEraseInit.NbPages = 1;
@@ -7,6 +7,12 @@ void erase_flash(uint32_t addr){
 	pEraseInit.TypeErase = FLASH_TYPEERASE_PAGES;
 	uint32_t PageError;
 	HAL_FLASHEx_Erase(&pEraseInit, &PageError);
+}
+
+void erase_app(void){
+	for(uint16_t i = 0; i < 50; i++){
+		erase_flash(ADDR_APP + i * 1024);
+	}
 }
 
 void unlock_flash(void){

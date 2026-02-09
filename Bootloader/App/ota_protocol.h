@@ -8,7 +8,7 @@
 #define OTA_CMD_START   0x01
 #define OTA_CMD_DATA    0x02
 #define OTA_CMD_END     0x03
-#define OTA_CMD_ACK     0x7F   // response from device
+#define OTA_CMD_ACK     0x04   // response from device
 
 /* ===== ACK status ===== */
 typedef enum
