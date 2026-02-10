@@ -115,17 +115,18 @@ void min_application_handler(uint8_t min_id,
 
         if (received_size + len > OTA_MAX_SIZE)
         {
+						HAL_GPIO_WritePin(GPIOA, GPIO_PIN_0, 1);
             bl_state = BL_ROLLBACK;
             break;
         }
 				if(len != FIRST_LINE_LENGTH){
 					unlock_flash();
+					HAL_GPIO_WritePin(GPIOA, GPIO_PIN_0, 1);
 					write_flash(write_addr, (uint8_t *)payload, len);
 					lock_flash();
 					write_addr += len;
 					received_size += len;
 				}
-				HAL_GPIO_WritePin(GPIOA, GPIO_PIN_0, 0);
         ota_send_ack(&min_ctx);
         break;
 
