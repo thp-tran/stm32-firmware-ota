@@ -63,7 +63,6 @@ void download_data()
     uint8_t lineBuffer[128];
     if (httpCode == 200)
     {
-        Serial.print("Find!!!");
         Serial.println();
         WiFiClient *stream = https.getStreamPtr();
         ota_send_start();
@@ -84,17 +83,21 @@ void download_data()
                     memcpy(data, &transmit_data[4], transmit_data[0]);
                     if (transmit_data[0] == 0)
                     {
-                        ota_command_t cmd;
-                        cmd.id = COMMAND; // Example command ID for OTA start
-                        cmd.code = END_OTA;
-                        send_cmd(cmd);
-                        https.end();
+                        send_cmd(OTA_CMD_END);
+                        set_ota_idle_state();
                         Serial.println("All data packets sent, sending OTA end command.");
+                        https.end();
                         return;
                     }
                     else
                     {
-                        Serial.println("Send data");
+
+                        for (uint8_t i = 0; i < transmit_data[0]; i++)
+                        {
+                            Serial.print(data[i], HEX);
+                            Serial.print(" "); // cho dễ nhìn
+                        }
+                        Serial.println();
                         send_data(data, transmit_data[0], OTA_CMD_DATA);
                     }
                 }
@@ -125,6 +128,12 @@ void processReq(byte *payload, int length)
         Serial.print("Start download");
         Serial.println();
         download_data();
+    }
+    if (doc["method"] == "Reset" && doc["params"] == true)
+    {
+        Serial.print("Reset chip");
+        Serial.println();
+        send_cmd(OTA_CMD_RST);
     }
 }
 

@@ -1,7 +1,7 @@
 #include "min_handle.h"
 HardwareSerial min_serial(1);
 min_context min_ctx;
-OTA_STATE ota_state;
+OTA_STATE ota_state = IDLE;
 void min_init()
 {
     min_serial.begin(115200, SERIAL_8N1, 17, 16);
@@ -65,9 +65,15 @@ void send_data(uint8_t *payload, uint8_t size, uint8_t min_id)
     min_send_frame(&min_ctx, min_id, (uint8_t *)payload, size);
 }
 
-void send_cmd(ota_command_t cmd)
+void send_cmd(uint8_t min_id)
 {
-    min_send_frame(&min_ctx, 0x00, (uint8_t *)&cmd, sizeof(cmd));
+    uint8_t dummy_data = 0xFF;
+    min_send_frame(&min_ctx, min_id, &dummy_data, sizeof(dummy_data));
+}
+
+void set_ota_idle_state(void)
+{
+    ota_state = IDLE;
 }
 
 void min_application_handler(uint8_t min_id, uint8_t const *min_payload, uint8_t len_payload, uint8_t port)
