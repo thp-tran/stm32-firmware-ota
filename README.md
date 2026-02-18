@@ -31,13 +31,13 @@ The architecture consists of three primary layers:
 
 ---
 
-## 3. Hardware Configuration
+## 3. Frame
 
-| ESP32 Pin | STM32 Pin | Description |
-| :--- | :--- | :--- |
-| **TX (GPIO 17)** | **RX (PA10 - UART1)** | OTA Command & Data Transmission |
-| **RX (GPIO 16)** | **TX (PA9 - UART1)** | ACK & Status Feedback |
-| **GND** | **GND** | Common Ground |
++------------+------------+--------+-----------+----------------+
+| Start Byte | ID Control | Length |   Data    |   Checksum     |
++------------+------------+--------+-----------+----------------+
+|   3 bytes  |   1 byte   | 1 byte | N bytes   |    4 bytes     |
++------------+------------+--------+-----------+----------------+
 
 
 
