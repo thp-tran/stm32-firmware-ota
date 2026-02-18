@@ -93,9 +93,8 @@ int main(void)
   MX_USART1_UART_Init();
   MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
-	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_0, 0);
+	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_2, 1);
 	uart_port_init();
-  /* Init bootloader + MIN */
   bootloader_init();
   /* USER CODE END 2 */
 
@@ -111,7 +110,6 @@ int main(void)
     {
 				min_poll(&min_ctx, &byte, 1);
     }
-
     /* Run OTA state machine */
     bootloader_process();
   }

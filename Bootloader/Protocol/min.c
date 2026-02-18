@@ -63,24 +63,24 @@ static void send_reset(struct min_context *self);
 
 static void crc32_init_context(struct crc32_context *context)
 {
-    context->crc = 0xffffffffU;
+    // context->crc = 0xffffffffU;
+    context->crc = 0;
 }
 
 static void crc32_step(struct crc32_context *context, uint8_t byte)
 {
-    uint32_t j;
-    context->crc ^= byte;
-    for (j = 0; j < 8; j++) {
-        uint32_t mask = (uint32_t) - (context->crc & 1U);
-        context->crc = (context->crc >> 1) ^ (0xedb88320U & mask);
-    }
+    // uint32_t j;
+    context->crc += byte;
+    // for (j = 0; j < 8; j++) {
+    //     uint32_t mask = (uint32_t) - (context->crc & 1U);
+    //     context->crc = (context->crc >> 1) ^ (0xedb88320U & mask);
+    // }
 }
 
 static uint32_t crc32_finalize(struct crc32_context *context)
 {
-    return ~context->crc;
+    return context->crc;
 }
-
 static void stuffed_tx_byte(struct min_context *self, uint8_t byte, bool crc)
 {
     // Transmit the byte

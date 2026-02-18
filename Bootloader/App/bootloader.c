@@ -29,9 +29,13 @@ static void bl_reset_ota(void)
 /* ===== Public functions ===== */
 void bootloader_init(void)
 {
-	  min_init_context(&min_ctx, 0);
-    bl_state = BL_IDLE;
-    ota_done_flag = false;
+			if((uint8_t)UPDATE_FLAG == 0xFF || (uint8_t)UPDATE_FLAG == 0x00){
+				erase_page(META_DATA_ADDR);	
+				board_jump_to_app();
+			}
+			min_init_context(&min_ctx, 0);
+			bl_state = BL_IDLE;
+			ota_done_flag = false;
 }
 
 bool bootloader_is_done(void)
@@ -80,6 +84,9 @@ void bootloader_process(void)
 
     case BL_JUMP_APP:
         ota_done_flag = true;
+				erase_page(META_DATA_ADDR);
+				uint8_t flag = 0x00;
+				write_flash(UPDATE_FLAG_ADDR, &flag, 1);
         board_jump_to_app();
         break;
 

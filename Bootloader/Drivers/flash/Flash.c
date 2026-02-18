@@ -24,8 +24,16 @@ void lock_flash(void){
 }
 
 void write_flash(uint32_t addr, uint8_t* mData, uint16_t len){
+	unlock_flash();
 	for(uint16_t i = 0; i < len; i += 2){
 		if(i + 1 >= len) mData[i + 1] = 0xFF;
 		HAL_FLASH_Program(FLASH_TYPEPROGRAM_HALFWORD, addr + i, (uint16_t)(mData[i + 1] << 8) | mData[i]);
 	}
+	lock_flash();
+}
+
+void erase_page(uint8_t page_addr){
+	unlock_flash();
+	erase_flash(META_DATA_ADDR);
+	lock_flash();
 }

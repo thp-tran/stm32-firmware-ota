@@ -32,6 +32,9 @@
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
 #define APP_ADDR 0x0800C800
+#define META_DATA_ADDR 0x0801FC00
+#define UPDATE_FLAG_ADDR 0x0801FFF0
+#define UPDATE_FLAG (*((volatile uint32_t*) (UPDATE_FLAG_ADDR)))
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -61,6 +64,16 @@ uint8_t header_cnt;
 uint8_t data[11];
 uint8_t index;
 uint8_t flag_receive_data;
+
+void erase_flash(uint32_t addr){
+	FLASH_EraseInitTypeDef pEraseInit;
+	pEraseInit.NbPages = 1;
+	pEraseInit.PageAddress = addr;
+	pEraseInit.TypeErase = FLASH_TYPEERASE_PAGES;
+	uint32_t PageError;
+	HAL_FLASHEx_Erase(&pEraseInit, &PageError);
+}
+
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart){
 		if(huart->Instance == huart2.Instance){
 			HAL_UART_Receive_IT(&huart2, &rx_byte, sizeof(rx_byte));
@@ -80,7 +93,11 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart){
 			header_cnt++;
 		}
 		if(data[3] == 0x05){
-			HAL_GPIO_WritePin(GPIOA, GPIO_PIN_0, 0);
+			HAL_FLASH_Unlock();
+			erase_flash(META_DATA_ADDR);
+			uint16_t flag = 0x01 | 0xFF << 8;
+			HAL_FLASH_Program(FLASH_TYPEPROGRAM_HALFWORD, UPDATE_FLAG_ADDR, (uint64_t)flag);
+			HAL_FLASH_Lock();
 			NVIC_SystemReset();
 		}
 		}
@@ -129,9 +146,9 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-		HAL_GPIO_WritePin(GPIOA, GPIO_PIN_0, 1);
+		HAL_GPIO_WritePin(GPIOB, GPIO_PIN_2, 1);
 		HAL_Delay(1000);
-		HAL_GPIO_WritePin(GPIOA, GPIO_PIN_0, 0);
+		HAL_GPIO_WritePin(GPIOB, GPIO_PIN_2, 0);
 		HAL_Delay(1000);
   }
   /* USER CODE END 3 */
@@ -220,9 +237,13 @@ static void MX_GPIO_Init(void)
 
   /* GPIO Ports Clock Enable */
   __HAL_RCC_GPIOA_CLK_ENABLE();
+  __HAL_RCC_GPIOB_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOA, GPIO_PIN_0, GPIO_PIN_RESET);
+
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_2, GPIO_PIN_RESET);
 
   /*Configure GPIO pin : PA0 */
   GPIO_InitStruct.Pin = GPIO_PIN_0;
@@ -230,6 +251,13 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : PB2 */
+  GPIO_InitStruct.Pin = GPIO_PIN_2;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
   /* USER CODE BEGIN MX_GPIO_Init_2 */
 
