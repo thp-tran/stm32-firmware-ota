@@ -32,13 +32,14 @@ The architecture consists of three primary layers:
 
 ## 3. Frame
 
-| Field       | Size    |
+| Field      | Size    |
 |------------|---------|
-| Start Byte | 3 bytes |
+| Start Byte | 3 bytes | 
 | ID Control | 1 byte  |
 | Length     | 1 byte  |
 | Data       | N bytes |
 | Checksum   | 4 bytes |
+| EOF        | 1 bytes |
 
 
 ---
